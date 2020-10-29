@@ -1,2 +1,2 @@
 # FStorage - An Android Application
-A Simple Android Application to store PDF Files into Firebase Storage.
+A Cloud Storage Android Mobile Application to store and retrieve PDF files.
