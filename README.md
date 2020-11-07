@@ -1,2 +1,3 @@
-# File Store - An Android Application
-A Cloud Storage Android Mobile Application to store and retrieve PDF files.
+# File Store
+
+### An android mobile application to store and retreive PDF files using firebase.
