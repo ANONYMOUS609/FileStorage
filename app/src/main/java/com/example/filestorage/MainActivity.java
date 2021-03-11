@@ -1,20 +1,22 @@
 package com.example.filestorage;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.view.menu.MenuView;
-
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Switch;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
@@ -24,27 +26,30 @@ import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
-import java.net.URI;
-
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private EditText file_name;
-    private Button upload_btn;
+    private EditText fileName;
+    private Button uploadBtn;
 
     DatabaseReference databaseReference;
     StorageReference storageReference;
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        file_name = (EditText) findViewById(R.id.file_name);
-        upload_btn = (Button) findViewById(R.id.upload_btn);
+        fileName = (EditText) findViewById(R.id.file_name);
+        uploadBtn = (Button) findViewById(R.id.upload_btn);
+        Toolbar toolbar = findViewById(R.id.toolBar);
+
+        toolbar.setTitle("File Store");
+        toolbar.setTitleTextColor(getResources().getColor(R.color.white));
+        getWindow().setStatusBarColor(getResources().getColor(R.color.colorPrimaryDark));
 
 
         storageReference = FirebaseStorage.getInstance().getReference();
         databaseReference = FirebaseDatabase.getInstance().getReference("uploads");
-
-        upload_btn.setOnClickListener(this);
+        uploadBtn.setOnClickListener(this);
     }
 
     @Override
@@ -75,7 +80,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         progressDialog.setTitle("Uploading..");
         progressDialog.show();
 
-        StorageReference reference = storageReference.child("uploads/" + System.currentTimeMillis()+".pdf");
+        if(fileName.getText().toString().isEmpty()){
+            String name = "Unknown"+System.currentTimeMillis();
+            fileName.setText(name);
+            Toast.makeText(MainActivity.this, "File name set to "+name, Toast.LENGTH_SHORT).show();
+        }
+
+        StorageReference reference = storageReference.child("uploads/" + fileName.getText().toString()+System.currentTimeMillis()+".pdf");
         reference.putFile(data)
                 .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                     @Override
@@ -83,13 +94,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         Task<Uri> uri = taskSnapshot.getStorage().getDownloadUrl();
                         while(!uri.isComplete());
                         Uri url = uri.getResult();
-                        if(file_name.getText().toString().isEmpty()){
-                            file_name.setText("Unknown"+System.currentTimeMillis());
-                            Toast.makeText(MainActivity.this, "File name set to default", Toast.LENGTH_SHORT).show();
-                        }
-                        UploadPDF uploadPDF = new UploadPDF(file_name.getText().toString(), url.toString());
+
+                        UploadPDF uploadPDF = new UploadPDF(fileName.getText().toString(), url.toString());
                         databaseReference.child(databaseReference.push().getKey()).setValue(uploadPDF);
-                        Toast.makeText(MainActivity.this, "Uploaded", Toast.LENGTH_SHORT).show();
                         progressDialog.dismiss();
                     }
                 }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
@@ -99,10 +106,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 double progress = (100.0 * taskSnapshot.getBytesTransferred())/taskSnapshot.getTotalByteCount();
                 progressDialog.setMessage("Uploaded "+(int) progress+"%");
             }
+        }).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                if(task.isSuccessful())
+                Toast.makeText(MainActivity.this, fileName.getText().toString()+" Uploaded" , Toast.LENGTH_SHORT).show();
+            }
         });
     }
 
     public void btn_click(View view) {
-        startActivity(new Intent(getApplicationContext(), View_File.class));
+        startActivity(new Intent(getApplicationContext(), ViewFile.class));
+    }
+
+    public void image_btn(View view) {
+        Toast.makeText(this, "Firebase", Toast.LENGTH_SHORT).show();
     }
 }
