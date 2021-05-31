@@ -1,5 +1,5 @@
 # File Store
-- **An android mobile application to store and retreive PDF files using google firebase database.**
+> - An android mobile application to store and retreive PDF files using google firebase database.
 
 <br/>
 
@@ -43,4 +43,6 @@ The main differences between the plans include the allocated storage on the real
 
 <br/>
 
-<img src="screenshots/FileStore.jpeg" width="200" heigth="400">
+### Application Screenshot
+
+<img src="screenshots/FileStore.jpeg" width="250" heigth="450">
