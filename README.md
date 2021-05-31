@@ -43,4 +43,4 @@ The main differences between the plans include the allocated storage on the real
 
 <br/>
 
-![](screenshots/FileStore.jpeg)
+<img src="screenshots/FileStore.jpeg" width="200" heigth="400">
